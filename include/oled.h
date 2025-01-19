@@ -1,5 +1,5 @@
-#ifndef _DISPLAY_H
-#define _DISPLAY_H
+#ifndef _OLED_H
+#define _OLED_H
 
 /*header files*/
 #include "Arduino.h"
@@ -8,16 +8,13 @@
 #include <Adafruit_SSD1306.h>
 #include "sonic.h"
 
-
 /*defines*/
 #define OLED_SCREEN_WIDTH 128 // OLED display width, in pixels
 #define OLED_SCREEN_HEIGHT 64 // OLED display height, in pixels
 
-#define OLED_IC2_SDA
-#define OLED_ICE_SDL    
-#define OLED_RESET     -1 // Reset pin # (or -1 if sharing Arduino reset pin)
+#define OLED_RESET -1 // Reset pin # (or -1 if sharing Arduino reset pin)
 
-//Main menu
+// Main menu
 #define OLED_WATER_LEVEL_TAG_CURSOR 0, 0
 #define OLED_QUEUE_STATUS_TAG_CURSOR 0, 16
 
@@ -27,25 +24,23 @@
 #define OLED_GET_WATER_CURSOR 0, 40
 #define OLED_GET_TICKET_CURSOR 0, 48
 
-//pumping
+// pumping
 #define OLED_PUMPING_CURSOR 40, 20
 
 /*Variable*/
-extern Adafruit_SSD1306 display;
 
-//typdefs
-typedef enum{
+/*typdefs*/
+typedef enum
+{
   MAIN_MENU = 0,
   WANTED_WATER = 1,
   DISPENSING_WATER = 2,
-}menu_e;
+  DISPLAY_QUEUE_NUM = 3
+} menu_e;
 
-//function
-boolean oled_init(Adafruit_SSD1306 display);
-void oled_updateWaterLevel(Adafruit_SSD1306 display, water_level_e level);
-void oled_updateQueue(Adafruit_SSD1306 display, water_level_e level);
-void oled_display(Adafruit_SSD1306 display, menu_e mNum);
-static void oled_displayMainMenu(Adafruit_SSD1306 display);
-static void oled_displayWantedWater(Adafruit_SSD1306 display);
-static void oled_displayPumping(Adafruit_SSD1306 display);
+/*function*/
+boolean oled_init(Adafruit_SSD1306 *display);
+void oled_updateWaterLevel(Adafruit_SSD1306 *display, water_level_e level);
+void oled_updateQueue(Adafruit_SSD1306 *display, water_level_e level);
+void oled_display(Adafruit_SSD1306 *display, menu_e mNum);
 #endif
