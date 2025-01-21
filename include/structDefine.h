@@ -11,8 +11,8 @@ typedef enum
 
 typedef struct
 {
-    boolean pumpOn, genNewQueueNum, checkPumpDuration;
-    volatile uint16_t oneSecond, pumpOnDuration;
+    boolean pumpOn, genNewQueueNum;
+    volatile uint16_t oneSecond;
     volatile boolean checkSonic;
 } pendingResponse_s;
 
@@ -22,4 +22,9 @@ typedef struct
     water_level_e currentWaterLevel;
 } water_data_s;
 
+typedef struct
+{
+    boolean pumpOn, timeConfigured;
+    uint8_t pumpOnTime;
+} pump_s;
 #endif

@@ -15,6 +15,7 @@ volatile uint8_t oneSecond;
 static water_data_s waterData;
 pendingResponse_s response;
 static queue_s q;
+static pump_s pump;
 static menu_e menuNumber;
 Adafruit_SSD1306 display(OLED_SCREEN_WIDTH, OLED_SCREEN_HEIGHT, &Wire, OLED_RESET);
 
@@ -22,9 +23,7 @@ void pendingReponseInit()
 {
   response.genNewQueueNum = false;
   response.pumpOn = false;
-  response.pumpOnDuration = 0;
   response.checkSonic = false;
-  response.checkPumpDuration = false;
 }
 
 void TC5_Handler(void)
@@ -93,6 +92,7 @@ void setup()
   // hardware init
   Serial.begin(115200);
   displayInit();
+  pump_init(&pump);
 
   // software init
   sonic_init(&waterData);
@@ -136,16 +136,14 @@ void loop()
   // Turns pump on if user is present
   if (response.pumpOn == true)
   {
-    // TODO: Turn on pump
     Serial.println("Pumping in progress...");
-    response.checkPumpDuration = true;
+    pump_dispense(&pump);
 
     // update screen
     menuNumber = DISPENSING_WATER;
     oled_display(&display, menuNumber);
 
     Serial.println("Pumping completed!");
-    response.checkPumpDuration = true;
     response.pumpOn = false;
   }
 
