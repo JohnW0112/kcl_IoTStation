@@ -12,9 +12,10 @@
 /*variables*/
 char keyPress;
 volatile uint8_t oneSecond;
+static water_data_s waterData;
 pendingResponse_s response;
-queue_s q;
-menu_e menuNumber;
+static queue_s q;
+static menu_e menuNumber;
 Adafruit_SSD1306 display(OLED_SCREEN_WIDTH, OLED_SCREEN_HEIGHT, &Wire, OLED_RESET);
 
 void pendingReponseInit()
@@ -29,12 +30,13 @@ void pendingReponseInit()
 void TC5_Handler(void)
 {
   oneSecond++;
-  Serial.print(oneSecond);
-  Serial.print(" Sec\n");
+
   if (oneSecond == 60)
   {
     response.checkSonic = true;
     oneSecond = 0;
+    Serial.print("Status: ok; Sys time: ");
+    Serial.println(millis());
   }
   // clear interrupt flag
   TC5->COUNT16.INTFLAG.bit.MC0 = 1;
@@ -93,6 +95,7 @@ void setup()
   displayInit();
 
   // software init
+  sonic_init(&waterData);
   pendingReponseInit();
 
   // enable 1 sec counter
@@ -103,18 +106,28 @@ void setup()
 
 void loop()
 {
+
   // When a key press is detected
   keyPress = keypad.getKey();
   if (keyPress)
   {
+    Serial.println("Getting keypress response...");
     keypad_getResponse(keyPress, menuNumber, &response);
   }
 
   // Check water level every 1 minute
   if (response.checkSonic)
   {
-    // TODO: Check water level
     Serial.println("Water level check beginning...");
+
+    // Get newest water level
+    sonic_updateCurrentLevel(&waterData);
+
+    // update display if in main menu
+    if (menuNumber == MAIN_MENU)
+    {
+      oled_updateWaterLevel(&display, waterData.currentWaterLevel);
+    }
 
     response.checkSonic = false;
     Serial.println("Water level check completed!");

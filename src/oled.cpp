@@ -98,5 +98,8 @@ void oled_display(Adafruit_SSD1306 *display, menu_e mNum)
     case DISPENSING_WATER:
         oled_displayPumping(display);
         break;
+    case DISPLAY_QUEUE_NUM:
+        oled_displayQueueNum(display);
+        break;
     }
 }
