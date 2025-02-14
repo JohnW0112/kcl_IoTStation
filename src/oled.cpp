@@ -7,11 +7,11 @@ static void oled_displayMainMenu(Adafruit_SSD1306 *display)
 
     // display water level text
     display->setCursor(OLED_WATER_LEVEL_TAG_CURSOR);
-    display->println("Water Level");
+    display->println("Water Level:");
 
     // display queue status
     display->setCursor(OLED_QUEUE_STATUS_TAG_CURSOR);
-    display->println("Queue number");
+    display->println("Queue number:");
 
     // display options
     display->setCursor(OLED_GET_WATER_CURSOR);
@@ -86,7 +86,6 @@ void oled_updateQueue(Adafruit_SSD1306 *display, water_level_e level)
 
 void oled_display(Adafruit_SSD1306 *display, menu_e mNum)
 {
-    // TODO: Uses the static display functions
     switch (mNum)
     {
     case MAIN_MENU:

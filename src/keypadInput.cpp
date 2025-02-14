@@ -31,12 +31,15 @@ void keypad_getResponse(char key, menu_e mNum, pendingResponse_s *r)
         }
         break;
     case WANTED_WATER:
-        //
+        // Echo input
         break;
     case DISPENSING_WATER:
         // no action
         break;
-    case DISPLAY_QUEUE_NUM:
+    case DISPLAY_CURRENT_QUEUE_NUM:
+        // no action
+        break;
+    case DISPLAY_NEW_QUEUE_NUM:
         // no action
         break;
     }

@@ -136,6 +136,7 @@ void loop()
   // Turns pump on if user is present
   if (response.pumpOn == true)
   {
+    // TODO: Decide how much water to dispense and get new queue number to display
     Serial.println("Pumping in progress...");
     pump_dispense(&pump);
 
@@ -150,6 +151,6 @@ void loop()
   // Generate new queue number
   if (response.genNewQueueNum == true)
   {
-    // TODO: Generate new queue num
+    // TODO: Generate new queue num and display new number for a while
   }
 }

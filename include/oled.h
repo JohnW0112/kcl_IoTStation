@@ -32,10 +32,11 @@
 /*typdefs*/
 typedef enum
 {
-  MAIN_MENU = 0,
-  WANTED_WATER = 1,
-  DISPENSING_WATER = 2,
-  DISPLAY_QUEUE_NUM = 3
+  MAIN_MENU,
+  WANTED_WATER,
+  DISPENSING_WATER,
+  DISPLAY_CURRENT_QUEUE_NUM,
+  DISPLAY_NEW_QUEUE_NUM
 } menu_e;
 
 /*function*/
