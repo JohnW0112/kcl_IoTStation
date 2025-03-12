@@ -10,6 +10,6 @@
 
 /*functions*/
 void pump_init(pump_s *p);
-void pump_dispense(pump_s *p);
+void pump_dispense(pump_s *p, uint8_t waterAmount);
 
 #endif

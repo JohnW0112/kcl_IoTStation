@@ -17,6 +17,9 @@ pendingResponse_s response;
 static queue_s q;
 static pump_s pump;
 static menu_e menuNumber;
+static user_input_s input;
+static user_input_e inputStat;
+static uint16_t tempQueueNum;
 Adafruit_SSD1306 display(OLED_SCREEN_WIDTH, OLED_SCREEN_HEIGHT, &Wire, OLED_RESET);
 
 void pendingReponseInit()
@@ -84,22 +87,24 @@ void displayInit()
   oled_init(&display);
   Serial.println("Display Initialized!");
   menuNumber = MAIN_MENU;
-  oled_display(&display, menuNumber);
+  oled_display(&display, menuNumber, &q, &waterData);
 }
 
 void setup()
 {
   // hardware init
   Serial.begin(115200);
-  displayInit();
+
   pump_init(&pump);
 
   // software init
+  queue_init(&q);
   sonic_init(&waterData);
   pendingReponseInit();
 
   // enable 1 sec counter
   timer2Init();
+  displayInit();
   Serial.println("Setup Completed!");
   TC5->COUNT16.CTRLA.reg |= TC_CTRLA_ENABLE;
 }
@@ -136,21 +141,116 @@ void loop()
   // Turns pump on if user is present
   if (response.pumpOn == true)
   {
-    // TODO: Decide how much water to dispense and get new queue number to display
-    Serial.println("Pumping in progress...");
-    pump_dispense(&pump);
+    if (q.isEmpty == false)
+    {
+      Serial.println("Pumping in progress...");
+      // update screen
+      menuNumber = DISPENSING_WATER;
+      oled_display(&display, menuNumber);
 
-    // update screen
-    menuNumber = DISPENSING_WATER;
-    oled_display(&display, menuNumber);
+      pump_dispense(&pump, q.currentWaterAmount);
 
-    Serial.println("Pumping completed!");
-    response.pumpOn = false;
+      Serial.println("Pumping completed!");
+
+      // Ready next queue number
+      if (queue_pop(&q) == 0)
+      {
+        Serial.println("Queue is empty!");
+      }
+      response.pumpOn = false;
+      // update screen back to main menue
+      menuNumber = MAIN_MENU;
+      oled_display(&display, menuNumber, &q, &waterData);
+    }
   }
 
   // Generate new queue number
   if (response.genNewQueueNum == true)
   {
-    // TODO: Generate new queue num and display new number for a while
+    menuNumber = WANTED_WATER;
+    oled_display(&display, menuNumber);
+
+    // queue is full; Notify user and return to main menue
+    if (q.isFull == true)
+    {
+      menuNumber = NOTIFY_QUEUE_FULL;
+      oled_display(&display, menuNumber);
+      delay(4000);
+
+      menuNumber = MAIN_MENU;
+      oled_display(&display, menuNumber, &q, &waterData);
+      response.genNewQueueNum = false;
+    }
+    else
+    {
+      keypad_userInputWaterInit(&input);
+      while (inputStat != INPUT_EXIT || inputStat != INPUT_COMPLETE)
+      {
+        // get key
+        keyPress = keypad.getKey();
+        if (keyPress)
+        {
+          // process input
+          inputStat = keypad_userInput(&input, keyPress);
+
+          // when input is done
+          if (inputStat == INPUT_COMPLETE)
+            goto genNewQ;
+
+          // Users terminates process
+          if (inputStat == INPUT_EXIT)
+            goto exit;
+
+          // when input is not valid, needs to notify user
+          if (inputStat == INPUT_INVALID)
+          {
+            menuNumber = NOTIFY_INVALID_INPUT;
+            oled_display(&display, menuNumber);
+            delay(4000);
+
+            menuNumber = WANTED_WATER;
+            oled_display(&display, menuNumber);
+
+            oled_echoUserInput(&display, &input);
+          }
+
+          if (inputStat == INPUT_OK)
+          {
+            oled_echoUserInput(&display, &input);
+          }
+          // do nothing when its full
+        }
+      }
+    genNewQ:
+      // Immediately update current queue num and water ammount if there is a sucessful insertion
+      if (q.head == q.tail && q.isEmpty == true)
+      {
+        tempQueueNum = queue_insert(&q, input.dataActual);
+        q.isEmpty = false;
+        queue_pop(&q);
+      }
+      else
+      {
+        tempQueueNum = queue_insert(&q, input.dataActual);
+      }
+
+      menuNumber = DISPLAY_NEW_QUEUE_NUM;
+      oled_display(&display, menuNumber, nullptr, nullptr, tempQueueNum);
+
+      // stay on new queue number for 4 seconds
+      delay(4000);
+    exit:
+
+      Serial.print("Current Q number: ");
+      Serial.println(q.currentQueueNumber);
+      Serial.print("Head: ");
+      Serial.println(q.head);
+      Serial.print("Tail: ");
+      Serial.println(q.tail);
+
+      menuNumber = MAIN_MENU;
+      oled_display(&display, menuNumber, &q, &waterData);
+      response.genNewQueueNum = false;
+    }
   }
 }

@@ -1,17 +1,28 @@
 #include "oled.h"
 
 /*static functions*/
-static void oled_displayMainMenu(Adafruit_SSD1306 *display)
+static void oled_displayMainMenu(Adafruit_SSD1306 *display, water_data_s *waterData, queue_s *q)
 {
     display->clearDisplay();
 
     // display water level text
     display->setCursor(OLED_WATER_LEVEL_TAG_CURSOR);
     display->println("Water Level:");
+    display->setCursor(OLED_WATER_LEVEL_CURSOR);
+    oled_updateWaterLevel(display, waterData->currentWaterLevel);
 
     // display queue status
     display->setCursor(OLED_QUEUE_STATUS_TAG_CURSOR);
-    display->println("Queue number:");
+    display->println("Current Queue number:");
+    display->setCursor(OLED_QUEUE_STATUS_CURSOR);
+    if (q->isEmpty == true)
+    {
+        display->println("Empty queue");
+    }
+    else
+    {
+        display->println(String(q->currentQueueNumber));
+    }
 
     // display options
     display->setCursor(OLED_GET_WATER_CURSOR);
@@ -25,7 +36,13 @@ static void oled_displayMainMenu(Adafruit_SSD1306 *display)
 
 static void oled_displayWantedWater(Adafruit_SSD1306 *display)
 {
-    // TODO: Display user input
+    display->clearDisplay();
+
+    // display water level text
+    display->setCursor(OLED_ECHO_WATER_AMOUNT_TAG_CURSOR);
+    display->println("Wanted water (1-20L):");
+
+    display->display();
 }
 
 static void oled_displayPumping(Adafruit_SSD1306 *display)
@@ -40,10 +57,43 @@ static void oled_displayPumping(Adafruit_SSD1306 *display)
     display->setTextSize(1);
 }
 
-static void oled_displayQueueNum(Adafruit_SSD1306 *display)
+static void oled_displayQueueNum(Adafruit_SSD1306 *display, uint16_t qNum)
 {
-    // TODO: Display new queue number to user
+    display->clearDisplay();
+
+    display->setCursor(OLED_NEW_QUEUE_NUM_TAG_CURSOR);
+    display->println("NEW QUEUE NUMBER:");
+
+    display->setCursor(OLED_NEW_QUEUE_NUM_CURSOR);
+    display->println(String(qNum));
+
+    display->display();
 }
+
+static void oled_displayNotifyQueueFull(Adafruit_SSD1306 *display)
+{
+    display->clearDisplay();
+
+    display->setTextSize(2);
+    display->setCursor(OLED_NOTIFY_QUEUE_FULL_TAG_CURSOR);
+    display->println("Queue is full!");
+
+    display->display();
+    display->setTextSize(1);
+}
+
+static void oled_displayNotifyInvalidInput(Adafruit_SSD1306 *display)
+{
+    display->clearDisplay();
+
+    display->setTextSize(2);
+    display->setCursor(OLED_NOTIFY_INVALID_INPUT_TAG_CURSOR);
+    display->println("INVALID INPUT!");
+
+    display->display();
+    display->setTextSize(1);
+}
+
 /*public functions*/
 boolean oled_init(Adafruit_SSD1306 *display)
 {
@@ -59,6 +109,25 @@ boolean oled_init(Adafruit_SSD1306 *display)
     }
 
     return displayInit;
+}
+void oled_echoUserInput(Adafruit_SSD1306 *display, user_input_s *input)
+{
+    String displayText = "";
+    oled_displayWantedWater(display);
+
+    for (uint8_t i = 0; i < 2; i++)
+    {
+        if (i < input->index)
+        {
+            displayText += String(input->data[i]);
+            continue;
+        }
+        displayText += ' ';
+    }
+    Serial.println(displayText);
+    display->println(displayText);
+
+    display->display();
 }
 
 void oled_updateWaterLevel(Adafruit_SSD1306 *display, water_level_e level)
@@ -79,17 +148,21 @@ void oled_updateWaterLevel(Adafruit_SSD1306 *display, water_level_e level)
     display->display();
 }
 
-void oled_updateQueue(Adafruit_SSD1306 *display, water_level_e level)
+void oled_updateQueue(Adafruit_SSD1306 *display, queue_s *q)
 {
-    // TODO: Update current queue number in main menu
+    display->setCursor(OLED_QUEUE_STATUS_CURSOR);
+    String text = String(q->currentQueueNumber);
+    display->println(text);
+
+    display->display();
 }
 
-void oled_display(Adafruit_SSD1306 *display, menu_e mNum)
+void oled_display(Adafruit_SSD1306 *display, menu_e mNum, queue_s *q, water_data_s *water, uint16_t displayQueueNum)
 {
     switch (mNum)
     {
     case MAIN_MENU:
-        oled_displayMainMenu(display);
+        oled_displayMainMenu(display, water, q);
         break;
     case WANTED_WATER:
         oled_displayWantedWater(display);
@@ -97,8 +170,14 @@ void oled_display(Adafruit_SSD1306 *display, menu_e mNum)
     case DISPENSING_WATER:
         oled_displayPumping(display);
         break;
-    case DISPLAY_QUEUE_NUM:
-        oled_displayQueueNum(display);
+    case DISPLAY_NEW_QUEUE_NUM:
+        oled_displayQueueNum(display, displayQueueNum);
+        break;
+    case NOTIFY_QUEUE_FULL:
+        oled_displayNotifyQueueFull(display);
+        break;
+    case NOTIFY_INVALID_INPUT:
+        oled_displayNotifyInvalidInput(display);
         break;
     }
 }

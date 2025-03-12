@@ -9,6 +9,15 @@ typedef enum
     WATER_LOW = 2
 } water_level_e;
 
+typedef enum
+{
+    INPUT_OK,
+    INPUT_COMPLETE,
+    INPUT_EXIT,
+    INPUT_INVALID,
+    INPUT_FULL,
+} user_input_e;
+
 typedef struct
 {
     boolean pumpOn, genNewQueueNum;
@@ -24,7 +33,14 @@ typedef struct
 
 typedef struct
 {
-    boolean pumpOn, timeConfigured;
-    uint8_t pumpOnTime;
+    boolean pumpOn;
+    uint16_t pumpOnTime;
 } pump_s;
+
+typedef struct
+{
+    uint8_t data[2], index, dataActual;
+    boolean backOnce;
+} user_input_s;
+
 #endif

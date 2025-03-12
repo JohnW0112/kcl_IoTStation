@@ -23,5 +23,7 @@ extern pendingResponse_s response;
 #define COLUMN_NUM 3
 
 /*function*/
+void keypad_userInputWaterInit(user_input_s *input);
+user_input_e keypad_userInput(user_input_s *input, char key);
 void keypad_getResponse(char key, menu_e mNum, pendingResponse_s *r);
 #endif

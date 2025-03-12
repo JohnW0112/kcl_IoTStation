@@ -6,19 +6,16 @@ void pump_init(pump_s *p)
     digitalWrite(PUMP_PIN, LOW);
 
     p->pumpOn = false;
-    p->timeConfigured = false;
     p->pumpOnTime = 0;
 }
 
-void pump_dispense(pump_s *p)
+void pump_dispense(pump_s *p, uint8_t waterAmount)
 {
-    if (p->timeConfigured == false || p->pumpOn == false)
-        return;
     // The flow rate of the pump is 32L/min
+    p->pumpOnTime = waterAmount * 1875;
     digitalWrite(PUMP_PIN, HIGH);
-    delay(p->pumpOnTime * 1000);
+    delay(p->pumpOnTime);
     digitalWrite(PUMP_PIN, LOW);
 
     p->pumpOn = false;
-    p->timeConfigured = false;
 }
