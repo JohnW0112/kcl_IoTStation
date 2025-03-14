@@ -42,6 +42,8 @@ static void oled_displayWantedWater(Adafruit_SSD1306 *display)
     display->setCursor(OLED_ECHO_WATER_AMOUNT_TAG_CURSOR);
     display->println("Wanted water (1-20L):");
 
+    display->setCursor(OLED_INSTRUCTION_TAG_CURSOR);
+    display->println("Press * to delete;Press # for enter");
     display->display();
 }
 

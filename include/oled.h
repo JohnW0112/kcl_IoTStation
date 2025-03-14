@@ -27,7 +27,7 @@
 #define OLED_GET_TICKET_CURSOR 0, 48
 
 // pumping
-#define OLED_PUMPING_CURSOR 0, 20
+#define OLED_PUMPING_CURSOR 0, 0
 
 // Show new queue num
 #define OLED_NEW_QUEUE_NUM_TAG_CURSOR 0, 20
@@ -36,6 +36,7 @@
 // Echo user input water amount
 #define OLED_ECHO_WATER_AMOUNT_TAG_CURSOR 0, 0
 #define OLED_ECHO_WATER_AMOUNT_CURSOR 0, 8
+#define OLED_INSTRUCTION_TAG_CURSOR 0, 24
 
 // Notify user queue is full
 #define OLED_NOTIFY_QUEUE_FULL_TAG_CURSOR 0, 20
