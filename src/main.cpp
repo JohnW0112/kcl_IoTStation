@@ -131,7 +131,7 @@ void loop()
     // update display if in main menu
     if (menuNumber == MAIN_MENU)
     {
-      oled_updateWaterLevel(&display, waterData.currentWaterLevel);
+      oled_display(&display, menuNumber, &q, &waterData);
     }
 
     response.checkSonic = false;

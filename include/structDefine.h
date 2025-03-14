@@ -27,7 +27,7 @@ typedef struct
 
 typedef struct
 {
-    uint8_t fullDistance, emptyDistance, lowLevel, medLevel;
+    float fullDistance, emptyDistance, lowLevel, medLevel;
     water_level_e currentWaterLevel;
 } water_data_s;
 

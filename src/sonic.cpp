@@ -1,28 +1,31 @@
 #include "sonic.h"
 
 /*Private functions*/
-static uint8_t sonic_getReading()
+static uint16_t sonic_getReading()
 {
     float duration;
 
+    digitalWrite(TRIG_PIN, LOW);
+    delayMicroseconds(2);
     digitalWrite(TRIG_PIN, HIGH);
     delayMicroseconds(10);
     digitalWrite(TRIG_PIN, LOW);
 
     duration = pulseIn(ECHO_PIN, HIGH);
-    // distance in cm = (duration * 340) /2 * 100
-    return (uint8_t)(duration * 17000);
+
+    // distance in cm = (duration / 1000 000 * 340) /2 * 100
+    return (uint16_t)(duration * 0.017);
 }
 
 static void sonic_updateLevels(water_data_s *data)
 {
-    uint8_t steps = (data->emptyDistance - data->fullDistance) / 100;
+    float steps = (data->emptyDistance - data->fullDistance) / 100;
 
     // low water level when less than 30%
-    data->lowLevel = data->fullDistance - (steps * 30);
+    data->lowLevel = data->emptyDistance - (steps * 30);
 
     // Medium water level when less than 70%
-    data->medLevel = data->fullDistance - (steps * 70);
+    data->medLevel = data->emptyDistance - (steps * 70);
 }
 
 /*public Functions*/
@@ -55,18 +58,23 @@ void sonic_setFullLevel(water_data_s *data)
 
 void sonic_updateCurrentLevel(water_data_s *data)
 {
-    uint8_t reading;
+    uint16_t reading;
     reading = sonic_getReading();
+    Serial.print("Sonic Reading: ");
+    Serial.println(reading);
 
     if (reading >= data->lowLevel)
     {
-        data->currentWaterLevel = WATER_HIGH;
+        data->currentWaterLevel = WATER_LOW;
+        Serial.println(data->lowLevel);
         return;
     }
     if (reading >= data->medLevel)
     {
         data->currentWaterLevel = WATER_MEDIUM;
+        Serial.println("WATER MEDIUM");
         return;
     }
+    Serial.println("WATER HIGH");
     data->currentWaterLevel = WATER_HIGH;
 }
