@@ -127,6 +127,7 @@ void oled_echoUserInput(Adafruit_SSD1306 *display, user_input_s *input)
         displayText += ' ';
     }
     Serial.println(displayText);
+    display->setCursor(OLED_ECHO_WATER_AMOUNT_CURSOR);
     display->println(displayText);
 
     display->display();
